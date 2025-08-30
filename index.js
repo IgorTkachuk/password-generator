@@ -146,11 +146,33 @@ class PasswordGenerator {
     
     const weighSummary = weightLength + weightGroup;
 
-    console.log(weighSummary);
-    
-    
     return strongCriterions.filter(({weightFrom, weightTo}) => weighSummary >= weightFrom && weighSummary<=weightTo )[0].name
 
+  }
+
+  validatePassword(password) {
+     const {
+      optUCase,
+      optLCase,
+      optNum,
+      optSym,
+      printableSymbols
+    } = this;
+
+    if([...password].includes(" ")) return false;
+
+    let pattern = "^";
+
+    if(optUCase) pattern += "(?=.*[A-Z])"
+    if(optLCase) pattern += "(?=.*[a-z])"
+    if(optNum) pattern += "(?=.*[0-9])"
+    if(optSym) pattern += `(?=.*[${printableSymbols.join("")}])`
+
+    pattern += ".+$"
+
+    const regexp = new RegExp(pattern)
+
+    return regexp.test(password)
   }
 
   generate() {
@@ -167,6 +189,8 @@ class PasswordGenerator {
     } = this;
     let dictionary = [];
 
+    if (+optUCase+optLCase+optNum+optSym > length) return "-1";
+
     if (optUCase) dictionary = [...dictionary, ...uppercase];
     if (optLCase) dictionary = [...dictionary, ...lowercase];
     if (optNum) dictionary = [...dictionary, ...digits];
@@ -176,10 +200,17 @@ class PasswordGenerator {
 
     if (length === 0 || dLength === 0) return "";
 
-    let result = "";
-    for (let i = 1; i <= length; i++) {
-      let random = Math.floor(Math.random() * dLength);
-      result += dictionary[random];
+    let result;
+    let validated = false;
+
+    while(!validated){
+      result = "";
+      for (let i = 1; i <= length; i++) {
+        let random = Math.floor(Math.random() * dLength);
+        result += dictionary[random];
+      }
+
+      validated = this.validatePassword(result);
     }
 
     return result;
@@ -204,7 +235,9 @@ function main() {
     const optSym = document.querySelector("#symbol").checked;
     const qualityName = document.querySelector('.quality-name');
     const qualityGraph = document.querySelector(".quality-graph")
-
+    const copied = document.querySelector('.password button div');
+    copied.innerText = '';
+    
     const length = sl.value;
 
     const gen = new PasswordGenerator({
@@ -219,20 +252,21 @@ function main() {
     pwd.value = gen.generate();
 
     const passwordRaiting = gen.passwordRaiting();
-
-    qualityGraph.classList.remove('too-weak', 'weak', 'medium', 'strong')
+    
+    qualityGraph.classList.remove('too-weak', 'weak', 'medium', 'strong');
     qualityGraph.classList.add(passwordRaiting);
-
     qualityName.innerText = passwordRaiting;
-
   });
 }
 
 window.addEventListener("load", () => {
   const copyToClipboard = document.querySelector(".password button");
   const pwd = document.querySelector(".password input[type=text]");
+  const copied = document.querySelector('.password button div');
+
   copyToClipboard.addEventListener("click", () => {
     navigator.clipboard.writeText(pwd.value);
+    copied.innerText = "COPIED"
   });
   main();
 });
