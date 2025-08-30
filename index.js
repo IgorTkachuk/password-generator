@@ -238,7 +238,6 @@ function main() {
     const copied = document.querySelector('.password button div');
     copied.innerText = '';
     
-
     const length = sl.value;
 
     const gen = new PasswordGenerator({
@@ -253,10 +252,9 @@ function main() {
     pwd.value = gen.generate();
 
     const passwordRaiting = gen.passwordRaiting();
-
+    
     qualityGraph.classList.remove('too-weak', 'weak', 'medium', 'strong');
     qualityGraph.classList.add(passwordRaiting);
-
     qualityName.innerText = passwordRaiting;
   });
 }
