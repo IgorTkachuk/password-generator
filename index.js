@@ -4,6 +4,7 @@ class Slider {
     this.slider = slider;
     this.isDragging = false;
     this.callback = callback;
+    this.value = 0;
     this.init();
   }
 
@@ -89,6 +90,91 @@ class PasswordGenerator {
     ).filter((ch) => !/[0-9a-zA-Z]/.test(ch));
   }
 
+  passwordRaiting(){
+    const strongCriterions = [
+      { name: 'too-weak', weightFrom: 0, weightTo: 2 },
+      { name: 'weak', weightFrom: 3, weightTo: 4 },
+      { name: 'medium', weightFrom: 5, weightTo: 6 },
+      { name: 'strong', weightFrom: 7, weightTo: 8 },
+    ]; 
+
+    const criterionsLenght = [
+      {
+        lenghtFrom: 0,
+        lenghtTo: 5,
+        weight: 0
+      },
+      {
+        lenghtFrom: 6,
+        lenghtTo: 8,
+        weight: 1
+      },
+      {
+        lenghtFrom: 9,
+        lenghtTo: 11,
+        weight:2
+      },
+      {
+        lenghtFrom: 12,
+        lenghtTo: 15,
+        weight:3
+      },
+      {
+        lenghtFrom: 16,
+        lenghtTo: Infinity,
+        weight: 4
+      },
+    ];
+
+    const {
+      optUCase,
+      optLCase,
+      optNum,
+      optSym,
+      length
+    } = this;
+
+
+    const weightLength = criterionsLenght.filter(
+      ({ lenghtFrom, lenghtTo }) =>
+        length >= lenghtFrom && length <= lenghtTo
+    )[0].weight;
+
+    let weightGroup = +optUCase + optLCase + optNum + optSym - 1;
+
+    if (weightGroup < 0) weightGroup = 0
+    
+    const weighSummary = weightLength + weightGroup;
+
+    return strongCriterions.filter(({weightFrom, weightTo}) => weighSummary >= weightFrom && weighSummary<=weightTo )[0].name
+
+  }
+
+  validatePassword(password) {
+     const {
+      optUCase,
+      optLCase,
+      optNum,
+      optSym,
+      printableSymbols
+    } = this;
+
+    if([...password].includes(" ")) return false;
+
+    let pattern = "^";
+
+    if(optUCase) pattern += "(?=.*[A-Z])"
+    if(optLCase) pattern += "(?=.*[a-z])"
+    if(optNum) pattern += "(?=.*[0-9])"
+    if(optSym) pattern += `(?=.*[${printableSymbols.join("")}])`
+
+    pattern += ".+$"
+
+    const regexp = new RegExp(pattern)
+
+    return regexp.test(password)
+  }
+
   generate() {
     const {
       optUCase,
@@ -103,6 +189,8 @@ class PasswordGenerator {
     } = this;
     let dictionary = [];
 
+    if (+optUCase+optLCase+optNum+optSym > length) return "-1";
+
     if (optUCase) dictionary = [...dictionary, ...uppercase];
     if (optLCase) dictionary = [...dictionary, ...lowercase];
     if (optNum) dictionary = [...dictionary, ...digits];
@@ -112,10 +200,17 @@ class PasswordGenerator {
 
     if (length === 0 || dLength === 0) return "";
 
-    let result = "";
-    for (let i = 1; i <= length; i++) {
-      let random = Math.floor(Math.random() * dLength);
-      result += dictionary[random];
+    let result;
+    let validated = false;
+
+    while(!validated){
+      result = "";
+      for (let i = 1; i <= length; i++) {
+        let random = Math.floor(Math.random() * dLength);
+        result += dictionary[random];
+      }
+
+      validated = this.validatePassword(result);
     }
 
     return result;
@@ -138,6 +233,11 @@ function main() {
     const optLCase = document.querySelector("#lcase").checked;
     const optNum = document.querySelector("#num").checked;
     const optSym = document.querySelector("#symbol").checked;
+    const qualityName = document.querySelector('.quality-name');
+    const qualityGraph = document.querySelector(".quality-graph")
+    const copied = document.querySelector('.password button div');
+    copied.innerText = '';
+    
 
     const length = sl.value;
 
@@ -151,14 +251,24 @@ function main() {
 
     const pwd = document.querySelector(".password input[type=text]");
     pwd.value = gen.generate();
+
+    const passwordRaiting = gen.passwordRaiting();
+
+    qualityGraph.classList.remove('too-weak', 'weak', 'medium', 'strong');
+    qualityGraph.classList.add(passwordRaiting);
+
+    qualityName.innerText = passwordRaiting;
   });
 }
 
 window.addEventListener("load", () => {
   const copyToClipboard = document.querySelector(".password button");
   const pwd = document.querySelector(".password input[type=text]");
+  const copied = document.querySelector('.password button div');
+
   copyToClipboard.addEventListener("click", () => {
     navigator.clipboard.writeText(pwd.value);
+    copied.innerText = "COPIED"
   });
   main();
 });
