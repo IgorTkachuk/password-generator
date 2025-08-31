@@ -59,9 +59,9 @@ class Slider {
 
     this.step = this.slider.clientWidth / this.MAX_CHARACTERS - 1;
 
-    this.thumb.addEventListener("mousedown", this.mouseDownHandler);
-    window.addEventListener("mouseup", this.mouseUpHandler);
-    window.addEventListener("mousemove", this.mouseMoveHandler);
+    this.thumb.addEventListener("pointerdown", this.mouseDownHandler);
+    window.addEventListener("pointerup", this.mouseUpHandler);
+    window.addEventListener("pointermove", this.mouseMoveHandler);
   }
 }
 
