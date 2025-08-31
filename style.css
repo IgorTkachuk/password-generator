@@ -258,3 +258,67 @@ body {
     margin-bottom: 32px;
   }
 }
+
+@media(max-width: 541px){
+  body {
+    font-size: 16px;
+  }
+
+  .container  {
+    width: 343px;
+
+    h1 {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+
+    input[type="text"]{
+      height: 64px;
+      padding: 17px 15px 15px 16px;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+
+    & .password button{
+      height: 64px;
+      right: 16px;
+    }
+
+    & .options {
+      width: 343px;
+      height: auto;
+      padding: 16px;
+      h2 {
+        font-size: 16px;
+        .character-length {
+          font-size: 24px;
+        }
+      }
+      .option-item {
+        margin-bottom: 16px;
+      }
+
+      .option-item:nth-of-type(5) {
+        margin-bottom: 32px;
+      }
+
+      button{
+        height: 56px;
+      }
+    }
+
+    .quality {
+      height: 56px;
+      padding: 14px 16px;
+      align-items: center;
+      margin-bottom: 16px;
+      .quality-value {
+        align-items: center;
+        .quality-name {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+}
